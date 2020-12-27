@@ -2,7 +2,8 @@
 
 Forward user voice from Discord to be accessible on web
 
-[![enter image description here](https://img.shields.io/github/license/Edqe14/MusicForwarder?style=for-the-badge)](https://github.com/Edqe14/MusicForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/MusicForwarder?style=for-the-badge) [![js-semistandard-style](https://raw.githubusercontent.com/standard/semistandard/master/badge.svg)](https://github.com/standard/semistandard)
+[![enter image description here](https://img.shields.io/github/license/Edqe14/MusicForwarder?style=for-the-badge)](https://github.com/Edqe14/MusicForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/MusicForwarder?style=for-the-badge)  
+[![js-semistandard-style](https://raw.githubusercontent.com/standard/semistandard/master/badge.svg)](https://github.com/standard/semistandard)
 
 ## Limitation/Cons
 
