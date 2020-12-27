@@ -6,15 +6,14 @@ const {
   guildID,
   channelID,
   userID,
-  ADMIN,
-  CHUNKS_SIZE
+  ADMIN
 } = require('./config.js');
 
 const express = require('express');
 const helmet = require('helmet');
 const djs = require('discord.js');
 const { EventEmitter } = require('events');
-const { Silence, processAudio } = require('./utils.js');
+const { Silence, processAudioStream, PassThrough } = require('./utils.js');
 
 const app = express();
 app.use(helmet());
@@ -28,7 +27,7 @@ let connection;
  * @type {djs.VoiceReceiver}
  */
 let receiver;
-
+const streams = {};
 const forwarder = new EventEmitter();
 forwarder.setMaxListeners(9999);
 
@@ -53,28 +52,34 @@ client.on('ready', async () => {
     end: 'manual'
   });
   receiver.setMaxListeners(9999);
-
-  let chunks = [];
-  receiver.on('data', (c) => {
-    forwarder.emit('raw', c);
-    if (chunks.length < CHUNKS_SIZE) return chunks.push(c);
-    else {
-      forwarder.emit('raw_chunks', chunks);
-      const f = processAudio(chunks);
-      f.on('data', (c) => forwarder.emit('chunk', c));
-
-      chunks = [];
-      chunks.push(c);
+  receiver.on('debug', (error) => {
+    if (error instanceof Error) {
+      if (error.message.includes('Couldn\'t resolve the user to create stream')) {
+        console.log('User is not connected to the voice channel. Watching the channel...');
+        /**
+         * @param {djs.User} user
+         */
+        const handler = (user) => {
+          if (user.id === userID) {
+            console.log('User is connected and speaking! Creating receiver...');
+            receiver = connection.receiver.createStream(userID, {
+              mode: 'pcm',
+              end: 'manual'
+            });
+            connection.removeListener('speaking', handler);
+          }
+        };
+        connection.on('speaking', handler);
+      }
     }
   });
 
-  // TODO fix glitch noise on end/start of audio packets
-
-  receiver.on('end', () => {
-    receiver.removeAllListeners();
-    forwarder.emit('end');
-    forwarder.removeAllListeners();
-  });
+  // const aacCopy = new PassThrough();
+  const mp3Copy = new PassThrough();
+  // receiver.pipe(aacCopy);
+  receiver.pipe(mp3Copy);
+  // streams.aac = processAudioStream(aacCopy);
+  streams.mp3 = processAudioStream(mp3Copy, 'mp3', 'libmp3lame');
   receiver.read();
 });
 
@@ -95,34 +100,34 @@ process.on('SIGINT', () => {
 
 app.use((req, res, next) => {
   res.header({
-    'Transfer-Encoding': 'chunked'
+    'Transfer-Encoding': 'binary',
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': 'no-cache',
+    'X-Pad': 'avoid browser bug'
   });
   next();
 });
 app.use(express.static('public'));
-app.get('/stream', (req, res) => {
+app.get('/stream/:format', (req, res) => {
   if (connection) {
+    const format = req.params.format || 'aac';
+    const stream = streams[format];
     try {
       res.header({
-        'Content-Type': 'audio/mp3'
+        'Content-Type': 'audio/' + format,
+        'Content-Disposition': `attachment; filename="audio.${format}"`
       });
 
-      const write = c => {
-        res.write(c);
-      };
-      const end = () => res.end();
-      forwarder.on('chunk', write);
-      forwarder.on('end', end);
-      return res.on('close', () => {
-        forwarder.removeListener('chunk', write);
-        forwarder.removeListener('end', end);
+      res.on('close', () => {
+        stream.unpipe(res);
         res.removeAllListeners();
       });
+      return stream.pipe(res);
     } catch (e) {
       console.error(e);
     }
   }
-  return res.status(500).send('Not connected');
+  return res.status(423).send('Not connected');
 });
 
 const PORT = process.env.PORT || 3000;

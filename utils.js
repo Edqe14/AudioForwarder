@@ -1,4 +1,4 @@
-const { Readable } = require('stream');
+const { Readable, PassThrough } = require('stream');
 const {
   FFMPEGPath,
   FFMPEGProbePath
@@ -16,27 +16,37 @@ class Silence extends Readable {
 
 /**
  * Process audio chunks
+ * @param {Readable} s Input stream
+ */
+const processAudioStream = (s, format = 'adts', codec = 'aac') => {
+  const f = ffmpeg({
+    source: s
+  })
+    .inputFormat('s32le')
+    .audioBitrate(128e3)
+    .audioChannels(2)
+    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.052+(1/2^(1.052/12))')
+    .audioCodec(codec)
+    .format(format)
+    .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e))
+    .pipe();
+  return f;
+};
+
+/**
+ * Process audio chunks
  * @param {Buffer[]} c Chunks array
  */
 const processAudio = (c) => {
   const buf = Buffer.concat(c);
   const source = Readable.from(buf);
-  const f = ffmpeg({
-    source
-  })
-    .inputFormat('s32le')
-    .audioBitrate(128e3)
-    .audioChannels(2)
-    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.1+(1/2^(1.09/12))')
-    .audioCodec('libmp3lame')
-    .format('mp3')
-    .on('error', console.error)
-    .pipe();
-  return f;
+  return processAudioStream(source);
 };
 
 module.exports = {
   Silence,
   Readable,
-  processAudio
+  PassThrough,
+  processAudio,
+  processAudioStream
 };

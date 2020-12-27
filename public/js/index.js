@@ -1,5 +1,5 @@
 const sound = new Howl({ // eslint-disable-line
-  src: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/stream`,
+  src: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/stream/mp3`,
   format: ['mp3'],
   html5: true,
   volume: 1
