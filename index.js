@@ -13,7 +13,13 @@ const express = require('express');
 const helmet = require('helmet');
 const djs = require('discord.js');
 const { EventEmitter } = require('events');
-const { Silence, processAudioStream, PassThrough } = require('./utils.js');
+const {
+  Silence,
+  processAudioStream,
+  Dumper,
+  largerStream
+} = require('./utils.js');
+const cloneable = require('cloneable-readable');
 
 const app = express();
 app.use(helmet());
@@ -24,7 +30,7 @@ const client = new djs.Client();
  */
 let connection;
 /**
- * @type {djs.VoiceReceiver}
+ * @type {import('stream').Readable}
  */
 let receiver;
 const streams = {};
@@ -43,6 +49,7 @@ client.on('ready', async () => {
   const voiceState = guild.voice;
   if (!voiceState || (voiceState && !voiceState.connection)) connection = await channel.join();
   else connection = voiceState.connection;
+
   // Play silent packets to fix not getting voice stream bug
   connection.play(new Silence(), { type: 'opus' });
   // connection.voice.setSelfMute(1);
@@ -74,13 +81,15 @@ client.on('ready', async () => {
     }
   });
 
-  // const aacCopy = new PassThrough();
-  const mp3Copy = new PassThrough();
-  // receiver.pipe(aacCopy);
-  receiver.pipe(mp3Copy);
-  // streams.aac = processAudioStream(aacCopy);
-  streams.mp3 = processAudioStream(mp3Copy, 'mp3', 'libmp3lame');
-  receiver.read();
+  const stream = cloneable(largerStream(receiver));
+  streams.aac = processAudioStream(stream.clone());
+  streams.mp3 = processAudioStream(stream.clone(), 'mp3', 'libmp3lame');
+  stream.read();
+  // Dumper stream to prevent the transcoder stream being full/stop flowing
+  // TODO fix random stutter
+  // Current Approach: changing stream highWaterMark
+  // Dumper is 1 << 16
+  Object.values(streams).forEach(rs => rs.pipe(new Dumper()));
 });
 
 // TODO admin commands
@@ -97,10 +106,12 @@ process.on('SIGINT', () => {
   if (connection && connection.voice && connection.voice.channel) connection.voice.channel.leave();
   process.exit(1);
 });
+// END Exit handler
 
+app.use(require('compression')());
 app.use((req, res, next) => {
   res.header({
-    'Transfer-Encoding': 'binary',
+    'Transfer-Encoding': 'chunked',
     'Access-Control-Allow-Origin': '*',
     'Cache-Control': 'no-cache',
     'X-Pad': 'avoid browser bug'
@@ -108,14 +119,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static('public'));
-app.get('/stream/:format', (req, res) => {
+app.get('/stream', (req, res) => {
   if (connection) {
-    const format = req.params.format || 'aac';
+    const format = req.query.format || 'aac';
     const stream = streams[format];
     try {
       res.header({
-        'Content-Type': 'audio/' + format,
-        'Content-Disposition': `attachment; filename="audio.${format}"`
+        'Content-Type': 'audio/' + format
       });
 
       res.on('close', () => {

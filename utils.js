@@ -1,4 +1,4 @@
-const { Readable, PassThrough } = require('stream');
+const { Readable, PassThrough, Writable } = require('stream');
 const {
   FFMPEGPath,
   FFMPEGProbePath
@@ -14,6 +14,18 @@ class Silence extends Readable {
   }
 }
 
+class Dumper extends Writable {
+  constructor () {
+    super({
+      highWaterMark: 1 << 16
+    });
+  }
+
+  _write (c, e, callback) {
+    callback();
+  }
+}
+
 /**
  * Process audio chunks
  * @param {Readable} s Input stream
@@ -25,12 +37,12 @@ const processAudioStream = (s, format = 'adts', codec = 'aac') => {
     .inputFormat('s32le')
     .audioBitrate(128e3)
     .audioChannels(2)
-    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.052+(1/2^(1.052/12))')
+    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.035+(1/2^(1.043/12))')
     .audioCodec(codec)
     .format(format)
     .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e))
     .pipe();
-  return f;
+  return largerStream(f);
 };
 
 /**
@@ -43,10 +55,26 @@ const processAudio = (c) => {
   return processAudioStream(source);
 };
 
+/**
+ * Create PassThrough stream with larger highWaterMark
+ * @param {Readable} s Readable stream
+ */
+const largerStream = (s) => {
+  const st = new PassThrough({
+    highWaterMark: 1 << 16,
+    readableHighWaterMark: 1 << 16,
+    writableHighWaterMark: 1 << 16
+  });
+  s.pipe(st);
+  return st;
+};
+
 module.exports = {
   Silence,
   Readable,
   PassThrough,
   processAudio,
-  processAudioStream
+  processAudioStream,
+  Dumper,
+  largerStream
 };

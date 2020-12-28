@@ -13,6 +13,9 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
+    "axios": "^0.21.1",
+    "cloneable-readable": "^2.0.1",
+    "compression": "^1.7.4",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
