@@ -175,15 +175,24 @@ app.get('/raw', (req, res) => {
   if (connection) {
     const id = req.query.id;
     if (!id) return res.status(400).send('Invalid ID');
-    if (!streams.has(id)) return res.status(404).send('Unknown ID');
+    if (!streams.has(id) && id !== 'mix') return res.status(404).send('Unknown ID');
     res.header({
       'Content-Type': 'binary'
     });
-    res.on('close', () => {
-      streams.get(id).stream.unpipe(res);
-      res.removeAllListeners();
-    });
-    return streams.get(id).stream.pipe(res);
+
+    if (id === 'mix') {
+      res.on('close', () => {
+        Mixer.unpipe(res);
+        res.removeAllListeners();
+      });
+      return Mixer.pipe(res);
+    } else {
+      res.on('close', () => {
+        streams.get(id).stream.unpipe(res);
+        res.removeAllListeners();
+      });
+      return streams.get(id).stream.pipe(res);
+    }
   }
   return res.status(423).send('Not connected');
 });
