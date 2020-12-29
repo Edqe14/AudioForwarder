@@ -1,6 +1,6 @@
 {
   "name": "musicforwarder",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Forward user voice from Discord to be accessible on web",
   "main": "src/index.js",
   "scripts": {
