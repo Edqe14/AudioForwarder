@@ -103,9 +103,10 @@ client.on('ready', async () => {
     }
 
     if (!streams.has(user.id)) return;
-    if (![...streams.values()].filter(s => s && s.piped === false).length && !removingSpeaking) {
+    if (![...streams.values()].filter(s => s && s.piped === false).length) {
+      if (removingSpeaking) return;
       removingSpeaking = true;
-      console.log('[DEBUG] Already created voice receiver for all user(s), removing "speaking" in 5 seconds listener...');
+      console.log('[DEBUG] Already created voice receiver for all user(s), removing "speaking" listener in 5 seconds...');
       await sleep(5000);
       return connection.removeListener('speaking', speakingHandler);
     }
@@ -113,6 +114,7 @@ client.on('ready', async () => {
     if (u.piped) return;
 
     console.log(`[DEBUG] ${user.tag} is speaking. Creating receiver...`);
+
     u.input = Mixer.input({
       highWaterMark,
       volume: userIDs[user.id]
@@ -123,8 +125,8 @@ client.on('ready', async () => {
       mode: 'pcm',
       end: 'manual'
     });
-
     console.log(`[DEBUG] ${user.tag}'s receiver "highWaterMark": ${r.readableHighWaterMark}\n`);
+
     r.pipe(u.input);
     u.piped = true;
     streams.set(u);
