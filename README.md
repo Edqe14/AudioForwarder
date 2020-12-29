@@ -7,8 +7,7 @@ Forward user voice from Discord to be accessible on web
 
 ## Limitation/Cons
 
- 1. Audio don't play on mobile for some reason
- 2. Random stutter
+ 1. Audio won't play on mobile for some reason
 
 ### Important
 
