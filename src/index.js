@@ -40,16 +40,23 @@ let connection;
  *  input: ?audiomixer.Input
  * }>}
  */
-const streams = new Map();
-Object.keys(userIDs).forEach((id) => {
-  streams.set(id, {
-    piped: false,
-    stream: null,
-    input: null
+let streams = new Map();
+if (userIDs === null || userIDs === undefined) {
+  console.log('[DEBUG] UserIDs is null, listening to the whole voice channel...');
+  streams = null;
+} else {
+  console.log('[DEBUG] Creating user streams collection...');
+  Object.keys(userIDs).forEach((id) => {
+    streams.set(id, {
+      piped: false,
+      stream: null,
+      input: null
+    });
   });
-});
+}
 
 const transcoders = {};
+console.log('[DEBUG] Creating Mixer...');
 const Mixer = new audiomixer.Mixer({
   highWaterMark,
   channels: 2,
@@ -57,6 +64,7 @@ const Mixer = new audiomixer.Mixer({
   sampleRate: 48000,
   clearInterval: 120
 });
+console.log('[DEBUG] Created Mixer');
 console.log(`[DEBUG] Mixer "highWaterMark": ${Mixer.readableHighWaterMark}`);
 
 client.on('ready', async () => {
@@ -76,8 +84,31 @@ client.on('ready', async () => {
   connection.play(new Silence(), { type: 'opus' });
   // connection.voice.setSelfMute(1);
 
-  connection.on('speaking', (user) => {
+  let removingSpeaking = false;
+  const speakingHandler = async (user) => {
+    if (streams === null) {
+      const r = connection.receiver.createStream(user, {
+        mode: 'pcm',
+        end: 'silence'
+      });
+      const input = Mixer.input({
+        highWaterMark
+      });
+      r.pipe(input);
+      r.on('end', () => {
+        Mixer.removeInput(input);
+        r.removeAllListeners();
+      });
+      return;
+    }
+
     if (!streams.has(user.id)) return;
+    if (![...streams.values()].filter(s => s && s.piped === false).length && !removingSpeaking) {
+      removingSpeaking = true;
+      console.log('[DEBUG] Already created voice receiver for all user(s), removing "speaking" in 5 seconds listener...');
+      await sleep(5000);
+      return connection.removeListener('speaking', speakingHandler);
+    }
     const u = streams.get(user.id);
     if (u.piped) return;
 
@@ -97,7 +128,8 @@ client.on('ready', async () => {
     r.pipe(u.input);
     u.piped = true;
     streams.set(u);
-  });
+  };
+  connection.on('speaking', speakingHandler);
 
   console.log('[DEBUG] Waiting for 5 seconds to load receivers...');
   await sleep(5000);
@@ -115,14 +147,15 @@ client.on('ready', async () => {
 });
 
 // Exit handler
+let exiting = false;
 process.on('exit', () => {
+  if (exiting) return;
+  exiting = true;
+  console.log('[DEBUG] Exiting...');
   if (connection && connection.voice && connection.voice.channel) connection.voice.channel.leave();
   process.exit(1);
 });
-process.on('SIGINT', () => {
-  if (connection && connection.voice && connection.voice.channel) connection.voice.channel.leave();
-  process.exit(1);
-});
+process.on('SIGINT', () => process.emit('exit', 'SIGINT'));
 // END Exit handler
 
 app.use((req, res, next) => {

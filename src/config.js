@@ -19,9 +19,10 @@ module.exports = {
   // --------|--------
   // id      |  volume
   userIDs: {
-    '234395307759108106': 20,
+    '234395307759108106': 50,
     '326966683187281922': 100
   },
+  // userIDs: null, // Listen to the whole voice channel
   FFMPEGPath: join(__dirname, 'ffmpeg', 'bin', 'ffmpeg.exe'),
   FFMPEGProbePath: join(__dirname, 'ffmpeg', 'bin', 'ffprobe.exe'),
   ADMIN: [

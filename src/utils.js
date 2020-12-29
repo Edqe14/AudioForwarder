@@ -43,7 +43,7 @@ const processAudioStream = (s, format = 'adts', codec = 'aac', inf = 's32le') =>
     .inputFormat(inf)
     .audioBitrate(128e3)
     .audioChannels(2)
-    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.046+(1/2^(1.045/12))')
+    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.017+(1/2^(1.045/12))')
     .audioCodec(codec)
     .format(format)
     .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e))
@@ -68,7 +68,7 @@ const processAudioStreams = (ss, format = 'adts', codec = 'aac') => {
   ss.forEach(u => options.push(`-i ${u}`));
   options = [
     ...options,
-    `-filter_complex "amix=inputs=${ss.length}:duration=longest,asetrate=48000*2^(1.09/12),atempo=0.051+(1/2^(1.051/12))"`,
+    `-filter_complex "amix=inputs=${ss.length}:duration=longest,asetrate=48000*2^(1.09/12),atempo=0.017+(1/2^(1.045/12))"`,
     '-b:a 128K',
     '-ac 2',
     `-c:a ${codec}`,
