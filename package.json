@@ -2,19 +2,19 @@
   "name": "musicforwarder",
   "version": "1.2.0",
   "description": "Forward user voice from Discord to be accessible on web",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node .",
-    "dev": "nodemon ."
+    "start": "node --trace-warnings src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
+    "audio-mixer": "^2.1.4",
     "axios": "^0.21.1",
-    "cloneable-readable": "^2.0.1",
     "compression": "^1.7.4",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",

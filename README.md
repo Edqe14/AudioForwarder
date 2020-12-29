@@ -7,15 +7,17 @@ Forward user voice from Discord to be accessible on web
 
 ## Limitation/Cons
 
- 1. Quite big delay gap (approx. 10s)
- 2. Noticeable cut between audio chunks
- 3. Only can listen to 1 user
- 4. Not built for big scaled usage
+ 1. Audio don't play on mobile for some reason
+ 2. Random stutter
+
+### Important
+
+Please read `notes/README.txt`
 
 ## Features
 
- 1. Audio Processing using FFMPEG
- 2. Raw/Processed chunk(s) event
+ 1. Realtime Audio Processing using FFMPEG
+ 2. Raw/Processed audio stream exposed on endpoints
  3. HTTP server using Express
 
 ## License
