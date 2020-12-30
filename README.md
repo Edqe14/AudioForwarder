@@ -1,8 +1,8 @@
-# MusicForwarder
+# AudioForwarder
 
 Forward user voice from Discord to be accessible on web
 
-[![enter image description here](https://img.shields.io/github/license/Edqe14/MusicForwarder?style=for-the-badge)](https://github.com/Edqe14/MusicForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/MusicForwarder?style=for-the-badge)  
+[![enter image description here](https://img.shields.io/github/license/Edqe14/AudioForwarder?style=for-the-badge)](https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/AudioForwarder?style=for-the-badge)  
 [![js-semistandard-style](https://raw.githubusercontent.com/standard/semistandard/master/badge.svg)](https://github.com/standard/semistandard)
 
 ## Limitation/Cons
@@ -15,11 +15,12 @@ Please read `notes/README.txt`
 
 ## Features
 
- 1. Realtime Audio Processing using FFMPEG
- 2. Raw/Processed audio stream exposed on endpoints
- 3. HTTP server using Express
+ 1. Capture whitelisted users or entire voice channel (anyone) voice
+ 2. Realtime Audio Processing using FFMPEG
+ 3. Raw/Processed audio stream exposed on endpoints
+ 4. HTTP server using Express
 
 ## License
 
 **This project is using MIT license © Edqe14**  
-[Click here](https://github.com/Edqe14/MusicForwarder/blob/main/LICENSE) to read LICENSE.
+[Click here](https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE) to read LICENSE.
