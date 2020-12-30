@@ -5,9 +5,11 @@ Forward user voice from Discord to be accessible on web
 [![enter image description here](https://img.shields.io/github/license/Edqe14/AudioForwarder?style=for-the-badge)](https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/AudioForwarder?style=for-the-badge)  
 [![js-semistandard-style](https://raw.githubusercontent.com/standard/semistandard/master/badge.svg)](https://github.com/standard/semistandard)
 
-## Limitation/Cons
+## Limitation/Known Issue
 
- 1. Audio won't play on mobile for some reason
+- Approx. 20% CPU usage & 50MB memory used **ON STARTUP**
+- Approx. max 1500 clients/listener (http(s)) on 1 instance
+- Memory level stayed high when stress test stopped (possible leak)
 
 ### Important
 

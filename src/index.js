@@ -10,7 +10,7 @@ const {
   userIDs
 } = require('./config.js');
 
-const djs = require('discord.js');
+const djs = require('discord.js-light');
 const {
   sleep,
   Silence,
@@ -21,7 +21,18 @@ const {
 } = require('./utils.js');
 const audiomixer = require('audio-mixer');
 
-const client = new djs.Client();
+const client = new djs.Client({
+  cacheGuilds: true,
+  cacheChannels: false,
+  cacheOverwrites: false,
+  cacheRoles: false,
+  cacheEmojis: false,
+  cachePresences: false,
+  fetchAllMembers: true,
+  ws: {
+    intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES']
+  }
+});
 
 /**
  * @type {djs.VoiceConnection}
@@ -57,7 +68,7 @@ const Mixer = new audiomixer.Mixer({
   channels: 2,
   bitDepth: 32,
   sampleRate: 48000,
-  clearInterval: 120
+  clearInterval: 250
 });
 console.log('[DEBUG] Created Mixer');
 console.log(`[DEBUG] Mixer "highWaterMark": ${Mixer.readableHighWaterMark}`);
@@ -66,10 +77,10 @@ const app = require('./server.js')(streams, transcoders);
 
 client.on('ready', async () => {
   console.log('[DEBUG] Bot ready\n');
-  const guild = client.guilds.resolve(guildID);
+  const guild = await client.guilds.fetch(guildID);
   if (!guild) return;
 
-  const channel = guild.channels.resolve(channelID);
+  const channel = await guild.channels.fetch(channelID);
   if (!channel) return;
   if (channel.type !== 'voice') throw new Error('Channel is not voice channel!');
 

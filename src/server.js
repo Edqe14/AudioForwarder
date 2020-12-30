@@ -4,7 +4,8 @@ const helmet = require('helmet');
 const socketio = require('socket.io');
 const ss = require('socket.io-stream');
 const morgan = require('morgan');
-const { Server } = require('http');
+const { createServer } = require('https');
+const fs = require('fs');
 
 /**
  * Create new server/express app
@@ -20,8 +21,10 @@ module.exports = (streams, transcoders) => {
   const app = express();
   app.use(helmet());
   app.use(morgan('[DEBUG] :method :url :status :res[content-length] - :response-time ms'));
-  app.use(express.static(join(__dirname, 'public')));
-  const server = Server(app);
+  const server = createServer({
+    key: fs.readFileSync(join(__dirname, 'cert', 'server.key'), 'utf-8'),
+    cert: fs.readFileSync(join(__dirname, 'cert', 'server.cert'), 'utf-8')
+  }, app);
   /**
    * @type {socketio.Server}
    */
@@ -137,6 +140,7 @@ module.exports = (streams, transcoders) => {
   });
 
   app.use(require('compression')());
+  app.use(express.static(join(__dirname, 'public')));
   app.get('/stream', (req, res) => {
     const format = req.query.format || 'aac';
     const stream = transcoders[format];
