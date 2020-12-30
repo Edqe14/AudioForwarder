@@ -1,6 +1,6 @@
+const { join } = require('path');
+
 /**
- * Config file
- *
  * @typedef {object} Config
  * @property {string} guildID Main guild ID
  * @property {string} channelID Main voice channel ID
@@ -8,10 +8,11 @@
  * @property {string} FFMPEGPath FFMPEG path
  * @property {string} FFMPEGProbePath FFMPEG Probe path (not used for now)
  * @property {string[]} ADMIN Admin IDs for commands (not implemented for now)
- *
- * @type {Config}
  */
-const { join } = require('path');
+
+/**
+ * Config file
+ */
 module.exports = {
   guildID: '669141768515878932',
   channelID: '793321187761455165',
