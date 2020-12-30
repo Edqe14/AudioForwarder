@@ -43,7 +43,7 @@ const processAudioStream = (s, format = 'adts', codec = 'aac', inf = 's32le') =>
     .inputFormat(inf)
     .audioBitrate(128e3)
     .audioChannels(2)
-    .complexFilter('asetrate=48000*2^(1.09/12),atempo=0.017+(1/2^(1.045/12))')
+    .complexFilter('asetrate=48000*2^(1.075/12),atempo=(1/2^(1.015/12))')
     .audioCodec(codec)
     .format(format)
     .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e))

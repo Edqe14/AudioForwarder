@@ -10,8 +10,6 @@ const {
   userIDs
 } = require('./config.js');
 
-const express = require('express');
-const helmet = require('helmet');
 const djs = require('discord.js');
 const {
   sleep,
@@ -22,10 +20,7 @@ const {
   copyStream
 } = require('./utils.js');
 const audiomixer = require('audio-mixer');
-const { join } = require('path');
 
-const app = express();
-app.use(helmet());
 const client = new djs.Client();
 
 /**
@@ -67,6 +62,8 @@ const Mixer = new audiomixer.Mixer({
 console.log('[DEBUG] Created Mixer');
 console.log(`[DEBUG] Mixer "highWaterMark": ${Mixer.readableHighWaterMark}`);
 
+const app = require('./server.js')(streams, transcoders);
+
 client.on('ready', async () => {
   console.log('[DEBUG] Bot ready\n');
   const guild = client.guilds.resolve(guildID);
@@ -79,6 +76,9 @@ client.on('ready', async () => {
   const voiceState = guild.voice;
   if (!voiceState || (voiceState && !voiceState.connection)) connection = await channel.join();
   else connection = voiceState.connection;
+
+  const PORT = process.env.PORT || 3000;
+  app.server.listen(PORT, () => console.log(`[DEBUG] Listening on port ${PORT}`));
 
   // Play silent packets to fix not getting voice stream bug
   connection.play(new Silence(), { type: 'opus' });
@@ -160,57 +160,4 @@ process.on('exit', () => {
 process.on('SIGINT', () => process.emit('exit', 'SIGINT'));
 // END Exit handler
 
-app.use((req, res, next) => {
-  res.header({
-    'Transfer-Encoding': 'chunked',
-    'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'no-cache',
-    'X-Pad': 'avoid browser bug'
-  });
-  next();
-});
-
-app.use(express.static(join(__dirname, 'public')));
-app.get('/raw', (req, res) => {
-  if (connection) {
-    const id = req.query.id;
-    if (!id) return res.status(400).send('Invalid ID');
-    if (!streams.has(id)) return res.status(404).send('Unknown ID');
-    res.header({
-      'Content-Type': 'binary'
-    });
-    res.on('close', () => {
-      streams.get(id).stream.unpipe(res);
-      res.removeAllListeners();
-    });
-    return streams.get(id).stream.pipe(res);
-  }
-  return res.status(423).send('Not connected');
-});
-
-app.use(require('compression')());
-app.get('/stream', (req, res) => {
-  const format = req.query.format || 'aac';
-  const stream = transcoders[format];
-  if (stream) {
-    try {
-      res.header({
-        'Content-Type': 'audio/' + format
-      });
-
-      res.on('close', () => {
-        stream.unpipe(res);
-        res.removeAllListeners();
-      });
-      return stream.pipe(res);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  return res.status(423).send('Not available');
-});
-
-const PORT = process.env.PORT || 3000;
-client.login(process.env.TOKEN).then(() => {
-  app.listen(PORT, () => console.log(`[DEBUG] Listening on port ${PORT}`));
-});
+client.login(process.env.TOKEN);
