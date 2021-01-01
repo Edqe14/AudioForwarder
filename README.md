@@ -7,7 +7,7 @@ Forward user voice from Discord to be accessible on web
 
 ## Limitation/Known Issue ⚠
 
-- Memory level stayed high when stress test stopped (possible leak)
+- Memory level stayed high when stress test stopped (possible leak). Refer to [server-side test result](https://github.com/Edqe14/AudioForwarder#server-side-)
 
 ### Important ❗
 
