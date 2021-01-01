@@ -1,6 +1,6 @@
 {
   "name": "audio-forwarder",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Forward user voice from Discord to be accessible on web",
   "main": "src/index.js",
   "scripts": {
