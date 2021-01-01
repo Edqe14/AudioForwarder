@@ -1,17 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="./libs/howler.min.js"></script>
-  <script src="./libs/jquery-3.5.1.slim.min.js"></script>
-  <script src="./js/index.js" defer></script>
+    <title>Edqe Audio-Forwarder</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata&amp;display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="https://edqe.me/assets/image/favicon.ico" type="image/x-icon">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="./vendor/howler.min.js"></script>
 </head>
-<body>
-  <button id='play'>Play</button>
-  <button id='pause'>Pause</button>
-  <p>Volume</p>
-  <input type="range" min="0" max="100" value="100" id="volume">
+
+<body cz-shortcut-listen="true">
+    <style>
+        body{font-family:'Inconsolata',monospace;margin:0 auto;background-color:#00303e}::selection{background: #ff2760ed;color:#fff}.header-area{position:relative;padding:8px 0 18px 0;overflow:hidden;margin-top:30px}.footer-area{position:relative;padding:8px 0 18px 0;overflow:hidden}.content-header h1{margin:10px auto;margin-bottom:0;color:#ffc800;font-size:2.5rem;font-weight:800;max-width:100%}.content-header h2{margin:10px auto;color:#ffc800;font-size:1.3rem;font-weight:800;max-width:100%}.footer-area .text-comment a{color:#919ca7;font-size:1.1rem;font-weight:normal;text-decoration:none}.header-area .text-comment a{color:#919ca7;font-size:1.5rem;font-weight:normal;text-decoration:none}p{color:#fff}.music-control{position:relative;z-index:1}.music-prog{-webkit-appearance:none;width:100%;height:20px;outline:none}.music-prog::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;cursor:pointer;background:#ffc800}.playpause label{outline:none}.playpause label:before{font:14px/1 FontAwesome;content:"\f04c";color:#ffc800;font-size:27px}.playpause input[type="checkbox"]{position:absolute;left:-9999px;outline:none}.playpause input[type="checkbox"]:checked+label:before{content:"\f04b";color:#fff}.music-timer{color:#fff;margin-left:12px}.music-timer .music-passed{font-weight:900;color:#ffc800}.music-volume-setting{display:none;-webkit-appearance:none;width:100px;height:20px;outline:none;background : linear-gradient(90deg, rgb(255, 200, 0)100%, rgb(211, 211, 211) 100%)}.music-volume-setting::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;background:#ffc800;cursor:pointer}.all-volume-setting label:before{font:14px/1 FontAwesome;content:"\f026";color:#fff;font-size:27px}.all-volume-setting input[type="checkbox"]{position:absolute;left:-9999px;outline:none}.all-volume-setting input[type="checkbox"]:checked+label:before{content:"\f027";color:#ffc800}.list-content p{color:#fff}.list a{text-decoration:none;display:block;font-size:1.1rem;margin:10px auto;transition:all .5s}.list a:hover{background-color:;background-color: #ffc8009e;padding:5px;transition:all .5s}.connection-failed{color:#ff5b5b}.connection-failed i{position:relative;top:1.3px;left:2px}.connection-failed i:hover{position:relative;top:1.3px;left:2px;opacity:.8}@media (max-width:450px){.header-area .text-comment a{color:#919ca7;font-size:1rem;font-weight:normal;text-decoration:none}.content-header h1{margin:10px auto;margin-bottom:10px;color:#ffc800;font-size:2rem;font-weight:800;max-width:100%}.all-controls{width:273px;position:relative;left:-10px}.all-volume-setting{position:absolute;right:20px}.music-volume-setting{display:unset!important;-webkit-appearance:none;width:95px;height:20px;background:#d3d3d3;outline:none;position:absolute;top:4px;right:-110px}.music-timer{position:absolute;top:30px;left:60px}.live{padding:4px,6px;background-color:rgb(241, 48, 48);}}
+    </style>
+    <div class="container">
+
+        <div class="header-area">
+            <p class="text-comment"><a href="https://edqe.me/">//Audio-Forwarder</a>
+                <a style="float:right" href="https://edqe.me/">//edqe.me</a>
+            </p>
+        </div>
+
+        <section>
+            <div class="content-header">
+                <h1 class="currentlyPlaying">Audio Forwarder Demonstration</h1>
+                <p>Forward user voice from Discord to be accessible on web</p>
+                <h2>status : <span id="status" class="connection-failed">connecting</i></span></h2>
+            </div>
+
+            <div class="mt-5 col-12 all-controls">
+                <audio muted>
+                    <!-- <source id="audio-src" type="audio/mpeg"> -->
+                    Your browser does not support the audio element.
+                  </audio>
+
+                <div class="d-flex flex-row music-control">
+                    <div class="playpause">
+                        <input type="checkbox" value="None" checked="" id="playpause" name="check">
+                        <label for="playpause" tabindex="1"></label>
+                    </div>
+                    <div class="align-middle col-9">
+                        <input class="music-prog align-middle" step="0.01" type="range" min="0" value="0" id="menit">
+                    </div>
+                    <div class="align-middle all-volume-setting">
+                        <input type="checkbox" value="None" checked="" id="music-volume" name="check">
+                        <label for="music-volume" tabindex="1"></label>
+                        <input class="music-volume-setting" type="range" step="0.01" min="0" max="1.0" value="1.0" id="volume">
+                    </div>
+                    <div class="music-timer">
+                        <a><span class="music-passed">0:00</span>  <span class="music-duration">/ <span class="live">LIVE</span></span></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-header mt-5">
+                <h1 class="currentlyPlaying">How Its Work?</h1>
+                <p>Go check the <a href="https://github.com/Edqe14/AudioForwarder">Github Repo</a> to find it yourself!</p>
+            </div>
+
+            <div class="mt-5 col-12">
+                <div class="list-content">
+                    <p class="list">
+                        <a>- Pray</a>
+                        <a>- Type</a>
+                        <a>- Try</a>
+                        <a>- Delete</a>
+                        <a>- Research</a>
+                        <a>- Type again</a>
+                        <a>- Try again</a>
+                        <a>- WORKED!</a>
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <footer>
+            <div class="footer-area mt-5 mb-5 text-center">
+                <p>Made with &#10084;&#65039; by Achmad Awdi</p>
+                <p class="text-comment"><a href="https://edqe.me/">Copyright © 2020 Edqe_</a></p>
+            </div>
+        </footer>
+    </div>
+    <script>
+        $(document).ready(function(){const url=`${window.location.protocol }//${window.location.hostname }:${window.location.port }`;var currentVolume=localStorage.getItem('volume')===null?1:localStorage.getItem('volume');var id;var player=new Howl({src:[`${ url }/stream`,`${ url }/stream?format=mp3`],format:['aac','mp3'],html5:true,volume:currentVolume,onload(){const status=$('#status');status.removeClass('connection-failed');status.addClass('connection-success');status.html('loaded');id=player.play(id)},onplay(){const status=$('#status');status.removeClass('connection-failed');status.addClass('connection-success');status.html('playing');requestAnimationFrame(timeupdate.bind(this));$('#playpause').prop('checked',false)},onplayerror(){const status=$('#status');status.removeClass('connection-success');status.addClass('connection-failed');status.html('player error');player.once('unlock',()=>id=player.play(id))}});$(".music-volume-setting").val(currentVolume);$('.music-volume-setting').css("background","linear-gradient(90deg, rgb(255, 200, 0)"+currentVolume*100+"%, rgb(211, 211, 211) "+currentVolume*100+"%)");$('#playpause').click(function(){if(!$(this).is(':checked')){if(!id){id=player.play(id)}else{player.mute(false)}}else{player.mute(true)}});$('#music-volume').click(function(){if(!$(this).is(':checked')){player.mute(true);currentVolume=player.volume();player.volume(0,id);$('.music-volume-setting').stop(true,true).animate({'value':player.volume()});$('.music-volume-setting').css("background","linear-gradient(90deg, rgb(255, 200, 0) 0%, rgb(211, 211, 211) 0%)")}else{player.mute(false);player.volume(currentVolume,id);$('.music-volume-setting').stop(true,true).animate({'value':currentVolume});$('.music-volume-setting').css("background","linear-gradient(90deg, rgb(255, 200, 0)"+currentVolume*100+"%, rgb(211, 211, 211) "+currentVolume*100+"%)")}});$(".all-volume-setting").hover(function(){$('.music-volume-setting').css("display","unset")},function(){$('.music-volume-setting').css("display","none")});$(".music-volume-setting").on('input',function(){const vol=$('#volume').val();player.volume(vol);localStorage.setItem('volume',vol);if(vol==0){player.mute(true)}else{player.mute(false);$('#music-volume').prop('checked',true);$('.music-volume-setting').css("background","linear-gradient(90deg, rgb(255, 200, 0)"+vol*100+"%, rgb(211, 211, 211) "+vol*100+"%)")}});const timeupdate=()=>{var currentTime=player.seek()||0;var mins=Math.floor(currentTime/60);var secs=Math.floor(currentTime%60);if(secs<10){secs='0'+String(secs)}$('.music-passed').text(mins+':'+secs);$('.music-prog').stop(true,true).animate({'value':'100%'});$('.music-prog').css("background","linear-gradient(90deg, rgb(255, 200, 0)"+100+"%, rgb(211, 211, 211) "+100+"%)");if(player.playing(id)){requestAnimationFrame(timeupdate.bind(this))}}});
+    </script>
+    <div>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link href="https://achmadawdi.xyz/cloudme.fonts.googleapis.com/css2?family=Inconsolata&amp;display=swap" rel="stylesheet">
+        <style>
+            body{font-family:'Inconsolata',monospace;margin:0 auto;background-color:#00303e}::selection{background: #ff2760ed;color:#fff}.header-area{position:relative;padding:8px 0 18px 0;overflow:hidden;margin-top:30px}.footer-area{position:relative;padding:8px 0 18px 0;overflow:hidden}.content-header h1{margin:10px auto;margin-bottom:0;color:#ffc800;font-size:2.5rem;font-weight:800;max-width:100%}.content-header h2{margin:10px auto;color:#ffc800;font-size:1.3rem;font-weight:800;max-width:100%}.footer-area .text-comment a{color:#919ca7;font-size:1.1rem;font-weight:normal;text-decoration:none}.header-area .text-comment a{color:#919ca7;font-size:1.5rem;font-weight:normal;text-decoration:none}p{color:#fff}.music-control{position:relative;z-index:1}.music-prog{-webkit-appearance:none;width:100%;height:20px;outline:none}.music-prog::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;cursor:pointer;background:#ffc800}.playpause label{outline:none}.playpause label:before{font:14px/1 FontAwesome;content:"\f04c";color:#ffc800;font-size:27px}.playpause input[type="checkbox"]{position:absolute;left:-9999px;outline:none}.playpause input[type="checkbox"]:checked+label:before{content:"\f04b";color:#fff}.music-timer{color:#fff;margin-left:12px}.music-timer .music-passed{font-weight:900;color:#ffc800}.music-volume-setting{display:none;-webkit-appearance:none;width:100px;height:20px;outline:none;background : linear-gradient(90deg, rgb(255, 200, 0)100%, rgb(211, 211, 211) 100%)}.music-volume-setting::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:25px;height:25px;background:#ffc800;cursor:pointer}.all-volume-setting label:before{font:14px/1 FontAwesome;content:"\f026";color:#fff;font-size:27px}.all-volume-setting input[type="checkbox"]{position:absolute;left:-9999px;outline:none}.all-volume-setting input[type="checkbox"]:checked+label:before{content:"\f027";color:#ffc800}.list-content p{color:#fff}.list a{text-decoration:none;display:block;font-size:1.1rem;margin:10px auto;transition:all .5s}.list a:hover{background-color:;background-color: #ffc8009e;padding:5px;transition:all .5s}.connection-success{color:#5bff61}.connection-failed{color:#ff5b5b}.connection-failed i{position:relative;top:1.3px;left:2px}.connection-failed i:hover{position:relative;top:1.3px;left:2px;opacity:.8}@media (max-width:450px){.header-area .text-comment a{color:#919ca7;font-size:1rem;font-weight:normal;text-decoration:none}.content-header h1{margin:10px auto;margin-bottom:10px;color:#ffc800;font-size:2rem;font-weight:800;max-width:100%}.all-controls{width:273px;position:relative;left:-10px}.all-volume-setting{position:absolute;right:20px}.music-volume-setting{display:unset!important;-webkit-appearance:none;width:95px;height:20px;background:#d3d3d3;outline:none;position:absolute;top:4px;right:-110px}.music-timer{position:absolute;top:30px;left:60px}}
+        </style>
+    </div>
 </body>
 </html>

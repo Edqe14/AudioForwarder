@@ -5,7 +5,17 @@ const socketio = require('socket.io');
 const ss = require('socket.io-stream');
 const morgan = require('morgan');
 const { createServer } = require('https');
+const { createServer: createHttpServer } = require('http');
 const fs = require('fs');
+
+const MIME_TYPES = {
+  aac: 'audio/aac',
+  mp3: 'audio/mp3',
+  wav: 'audio/wav'
+};
+
+const PORT = process.env.PORT || 8443;
+const HTTP_PORT = process.env.HTTP_PORT || 8080;
 
 /**
  * Create new server/express app
@@ -16,11 +26,22 @@ const fs = require('fs');
  *  input: ?import('audio-mixer').Input
  * }>} streams Streams collection
  * @param {object} transcoders Transcoders object
+ * @param {import('audio-mixer').Mixer} Mixer Audio mixer
  */
-module.exports = (streams, transcoders) => {
+module.exports = (streams, transcoders, Mixer) => {
   const app = express();
   app.use(helmet());
   app.use(morgan('[DEBUG] :method :url :status :res[content-length] - :response-time ms'));
+  app.use((req, res, next) => {
+    res.header({
+      'Content-Security-Policy': "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+    });
+    if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
+      return res.redirect(`https://${req.hostname}:${PORT}${req.url}`);
+    }
+    next();
+  });
+  const httpServer = createHttpServer(app);
   const server = createServer({
     key: fs.readFileSync(join(__dirname, 'cert', 'server.key'), 'utf-8'),
     cert: fs.readFileSync(join(__dirname, 'cert', 'server.cert'), 'utf-8')
@@ -28,9 +49,7 @@ module.exports = (streams, transcoders) => {
   /**
    * @type {socketio.Server}
    */
-  const io = socketio(server, {
-    wsEngine: 'ws'
-  });
+  const io = socketio(server);
 
   /**
    * Socket.io/WS handler
@@ -47,13 +66,13 @@ module.exports = (streams, transcoders) => {
       }
 
       const id = data.id;
-      if (!id) {
+      if (!id && id !== 'mix') {
         return socket.emit('error', {
           pid,
           message: 'Invalid ID'
         });
       }
-      if (!streams.has(id)) {
+      if (!streams.has(id) && id !== 'mix') {
         return socket.emit('error', {
           pid,
           error: 'Unknown ID'
@@ -69,11 +88,13 @@ module.exports = (streams, transcoders) => {
 
       const dcHandler = () => {
         stream.destroy();
-        streams.get(id).stream.unpipe(stream);
+        if (id === 'mix') Mixer.unpipe(stream);
+        else streams.get(id).stream.unpipe(stream);
         socket.removeListener('disconnect', dcHandler);
       };
       socket.on('disconnect', dcHandler);
-      return streams.get(id).stream.pipe(stream);
+      if (id === 'mix') return Mixer.pipe(stream);
+      else return streams.get(id).stream.pipe(stream);
     });
 
     socket.on('stream', (data) => {
@@ -99,6 +120,7 @@ module.exports = (streams, transcoders) => {
           socket.removeListener('disconnect', dcHandler);
         };
         socket.on('disconnect', dcHandler);
+        st.on('close', dcHandler);
         return stream.pipe(st);
       }
 
@@ -120,6 +142,7 @@ module.exports = (streams, transcoders) => {
     res.header({
       'Transfer-Encoding': 'chunked',
       'Access-Control-Allow-Origin': '*',
+      'Accept-Range': 'bytes',
       'Cache-Control': 'no-cache',
       'X-Pad': 'avoid browser bug'
     });
@@ -147,7 +170,7 @@ module.exports = (streams, transcoders) => {
     if (stream) {
       try {
         res.header({
-          'Content-Type': 'audio/' + format
+          'Content-Type': MIME_TYPES[format]
         });
 
         res.on('close', () => {
@@ -162,8 +185,12 @@ module.exports = (streams, transcoders) => {
     return res.status(423).send('Not available');
   });
 
+  server.listen(PORT, () => console.log(`[DEBUG] HTTPS Server is listening on port ${PORT}`));
+  httpServer.listen(HTTP_PORT, () => console.log(`[DEBUG] HTTP Server is listening on port ${HTTP_PORT}`));
+
   return {
     server,
+    httpServer,
     app,
     io
   };

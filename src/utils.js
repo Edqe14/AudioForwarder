@@ -46,9 +46,8 @@ const processAudioStream = (s, format = 'adts', codec = 'aac', inf = 's32le') =>
     .complexFilter('asetrate=48000*2^(1.075/12),atempo=(1/2^(1.015/12))')
     .audioCodec(codec)
     .format(format)
-    .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e))
-    .pipe();
-  return f;
+    .on('error', (e) => e.message.includes('stream closed') ? null : console.error(e));
+  return f.pipe();
 };
 
 /* eslint-disable */

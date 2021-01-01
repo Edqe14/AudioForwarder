@@ -73,8 +73,6 @@ const Mixer = new audiomixer.Mixer({
 console.log('[DEBUG] Created Mixer');
 console.log(`[DEBUG] Mixer "highWaterMark": ${Mixer.readableHighWaterMark}`);
 
-const app = require('./server.js')(streams, transcoders);
-
 client.on('ready', async () => {
   console.log('[DEBUG] Bot ready\n');
   const guild = await client.guilds.fetch(guildID);
@@ -88,8 +86,7 @@ client.on('ready', async () => {
   if (!voiceState || (voiceState && !voiceState.connection)) connection = await channel.join();
   else connection = voiceState.connection;
 
-  const PORT = process.env.PORT || 3000;
-  app.server.listen(PORT, () => console.log(`[DEBUG] Listening on port ${PORT}`));
+  require('./server.js')(streams, transcoders, Mixer);
 
   // Play silent packets to fix not getting voice stream bug
   connection.play(new Silence(), { type: 'opus' });
