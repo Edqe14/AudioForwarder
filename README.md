@@ -18,7 +18,8 @@ Please read `notes/README.txt`
  1. Capture whitelisted users or entire voice channel (anyone) voice
  2. Realtime Audio Processing using FFMPEG
  3. Raw/Processed audio stream exposed on endpoints
- 4. HTTP server using Express
+ 4. HTTP, HTTPS server using Express
+ 5. WebSocket using Socket.IO
 
 ## Tests 🔧
 
