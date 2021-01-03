@@ -55,7 +55,7 @@ Found at `src/test`
 
 | Client Count | Memory Used (MB) |
 |--|--|
-| 0 *`(STARTUP)`* | 50 |
+| 0 *`(START)`* | 50 |
 | 500 | 100 |
 | 1000 | 165 |
 | 1500 | 220 |
