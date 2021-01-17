@@ -11,7 +11,8 @@ const fs = require('fs');
 const MIME_TYPES = {
   aac: 'audio/aac',
   mp3: 'audio/mp3',
-  wav: 'audio/wav'
+  wav: 'audio/wav',
+  m4a: 'audio/mp4'
 };
 
 const PORT = process.env.PORT || 8443;
@@ -43,9 +44,10 @@ module.exports = (streams, transcoders, Mixer) => {
   });
   const httpServer = createHttpServer(app);
   const server = createServer({
-    key: fs.readFileSync(join(__dirname, 'cert', 'server.key'), 'utf-8'),
-    cert: fs.readFileSync(join(__dirname, 'cert', 'server.cert'), 'utf-8')
+    key: fs.readFileSync(join(__dirname, '..', 'cert', 'server.key'), 'utf-8'),
+    cert: fs.readFileSync(join(__dirname, '..', 'cert', 'server.cert'), 'utf-8')
   }, app);
+
   /**
    * @type {socketio.Server}
    */
@@ -87,9 +89,9 @@ module.exports = (streams, transcoders, Mixer) => {
       });
 
       const dcHandler = () => {
-        stream.destroy();
         if (id === 'mix') Mixer.unpipe(stream);
         else streams.get(id).stream.unpipe(stream);
+        stream.destroy();
         socket.removeListener('disconnect', dcHandler);
       };
       socket.on('disconnect', dcHandler);
@@ -115,8 +117,8 @@ module.exports = (streams, transcoders, Mixer) => {
         });
 
         const dcHandler = () => {
-          st.destroy();
           stream.unpipe(st);
+          st.destroy();
           socket.removeListener('disconnect', dcHandler);
         };
         socket.on('disconnect', dcHandler);

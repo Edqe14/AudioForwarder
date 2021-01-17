@@ -1,13 +1,16 @@
-# AudioForwarder
+<div align="center">
+  <img src="https://i.imgur.com/hnvQ6GV.png" alt="logo" style="width: 75%; height: auto;"></img>
+  <h4>Forward user voice from Discord to be accessible on web</h4>
 
-Forward user voice from Discord to be accessible on web
-
-[![enter image description here](https://img.shields.io/github/license/Edqe14/AudioForwarder?style=for-the-badge)](https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE) ![Dependencies](https://img.shields.io/david/Edqe14/AudioForwarder?style=for-the-badge)  
-[![js-semistandard-style](https://raw.githubusercontent.com/standard/semistandard/master/badge.svg)](https://github.com/standard/semistandard)
+  <a href="https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Edqe14/AudioForwarder?style=for-the-badge" alt="License"></img></a>
+  <a href="https://david-dm.org/edqe14/AudioForwarder"><img src="https://img.shields.io/david/Edqe14/AudioForwarder?style=for-the-badge" alt="Dependencies"></img></a>
+  <br>
+  <a href="https://github.com/standard/semistandard"><img src="https://raw.githubusercontent.com/standard/semistandard/master/badge.svg" alt="Semi-standard"></img></a>
+</div>
 
 ## Limitation/Known Issue ⚠
 
-- Memory level stayed high when stress test stopped (possible leak). Refer to [server-side test result](https://github.com/Edqe14/AudioForwarder#server-side-)
+- Memory level stayed high when stress test stopped (possible leak). Refer to [server-side test result](#server-side-)
 
 ### Important ❗
 
@@ -20,10 +23,12 @@ Please read `notes/README.txt`
  3. Raw/Processed audio stream exposed on endpoints
  4. HTTP, HTTPS server using Express
  5. WebSocket using Socket.IO
+ 6. WebRTC transmission
 
 ## Tests 🔧
 
 Found at `src/test`
+
 | Script | Description |
 |--|--|
 | audio_getter.js | Get audio stream from HTTP endpoint |
