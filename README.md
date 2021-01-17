@@ -31,9 +31,9 @@ Found at `src/test`
 
 | Script | Description |
 |--|--|
-| audio_getter.js | Get audio stream from HTTP endpoint |
-| client_stresser.js | Stress test the server by spamming request for audio data |
-| ws_client.js | WebSocket client example |
+| AudioGetter.ts | Get audio stream from HTTP endpoint |
+| ClientStresser.ts | Stress test the server by spamming request for audio data |
+| WSClient.ts | WebSocket client example |
 
 ### Stress Test Results 🧪
 
@@ -63,13 +63,10 @@ Found at `src/test`
 | 0 *`(START)`* | 50 |
 | 500 | 100 |
 | 1000 | 165 |
-| 1500 | 220 |
-| 1750 | 310 |
-| 2000 | 405 |
-| 2200 | 425 |
-| 2350 | 480 |
-| 2500 | 520 |
-| 0 *`(END)`* | 110 |
+| 1500 | 200 |
+| 1750 | 226 |
+| 2000 | 250 |
+| 0 *`(END)`* | 130 |
 
 ## License 📰
 
