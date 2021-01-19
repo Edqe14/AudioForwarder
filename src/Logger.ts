@@ -4,18 +4,24 @@ export const logger = createLogger({
   level: 'info',
   format: format.json(),
   transports: [
-    //
-    // - Write all logs with level `error` and below to `error.log`
-    // - Write all logs with level `info` and below to `combined.log`
-    //
-    new transports.File({ filename: 'error.log', level: 'error' }),
-    new transports.File({ filename: 'combined.log' }),
+    new transports.File({
+      level: 'info',
+      format: format.json(),
+      filename: './logs/all.log',
+      handleExceptions: true,
+      maxsize: 5242880,
+      zippedArchive: true
+    })
   ],
+  exitOnError: false
 });
 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new transports.Console({
-    format: format.simple(),
+    format: format.combine(
+      format.colorize(),
+      format.simple()
+    ),
     level: 'debug',
     handleExceptions: true
   }));

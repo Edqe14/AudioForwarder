@@ -10,6 +10,7 @@ const { guildID, channelID, userIDs, listenAll } = Config;
 
 import { Client, User, VoiceChannel, VoiceConnection, Collection } from 'discord.js-light';
 import { Mixer, Input } from 'audio-mixer';
+import { PassThrough } from 'stream'
 import {
   sleep,
   Silence,
@@ -145,8 +146,10 @@ client.on('ready', async () => {
   await sleep(2000);
   logger.info('Loading transcoders...');
 
-  transcoders.set('aac', processAudioStream(copyStream(mixer)) as import('stream').PassThrough);
-  transcoders.set('mp3', processAudioStream(copyStream(mixer), 'mp3', 'libmp3lame') as import('stream').PassThrough);
+  transcoders.set('aac', processAudioStream(mixer) as PassThrough);
+  transcoders.set('mp3', processAudioStream(mixer, 'mp3', 'libmp3lame') as PassThrough);
+  transcoders.set('ogg', processAudioStream(mixer, 'ogg', 'libvorbis') as PassThrough); // NOT PLAYING
+  transcoders.set('webm', processAudioStream(mixer, 'webm', 'libopus') as PassThrough); // NOT PLAYING
   logger.info(`Transcoding to "${transcoders.keyArray().join(', ')}" format(s)`);
 
   // Prevent overloading

@@ -13,7 +13,10 @@ import { logger } from './Logger';
 export const MIME_TYPES = new Collection([
   ['aac', 'audio/aac'],
   ['mp3', 'audio/mp3'],
-  ['wav', 'audio/wav']
+  ['wav', 'audio/wav'],
+  ['webm', 'audio/webm; codecs="opus"'],
+  ['ogg', 'audio/ogg'],
+  ['mp4', 'audio/mp4']
 ]);
 
 import Stream from './routers/Stream';
@@ -42,7 +45,7 @@ export default (streams: Collection<string, { piped: boolean, stream?: import('s
   const httpServer = http.createServer(app);
   const server = https.createServer({
     key: fs.readFileSync(join(__dirname, '..', 'cert', 'server.key'), 'utf-8'),
-    cert: fs.readFileSync(join(__dirname, '..', 'cert', 'server.cert'), 'utf-8')
+    cert: fs.readFileSync(join(__dirname, '..', 'cert', 'server.crt'), 'utf-8')
   }, app);
 
   app.use((_, res, next) => {

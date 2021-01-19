@@ -18,7 +18,7 @@ export class Silence extends Readable {
 export class Dumper extends Writable {
   constructor () {
     super({
-      highWaterMark
+      highWaterMark: 1 << 16
     });
   }
 
@@ -27,19 +27,19 @@ export class Dumper extends Writable {
   }
 }
 
-export const processAudioStream = (s: PassThrough | Readable, format = 'adts', codec = 'aac', inf = 's32le') => {
-  const f = ffmpeg({
-    source: s
-  }).inputFormat(inf);
+export const processAudioStream = (s: PassThrough | Readable, format = 'adts', codec = 'aac', inf = 's32le', rate = 48000) => {
+  const options = [
+    format === 'mp3' ? '-q:a 2' : '-b:a 128K',
+    '-ac 2',
+    '-vn',
+    `-c:a ${codec}`,
+    `-f ${format}`,
+    `-ar ${rate}`,
+  ];
+  if (format === 'webm') options.splice(1, 0, '-dash 1');
 
-  if (format === 'mp3') f.addOption(['-q:a 2']);
-  else f.audioBitrate(128e3);
-
-  f.audioChannels(2)
-    .complexFilter('asetrate=48000*2^(1.065/12),atempo=(1/2^(1.014/12))')
-    .audioCodec(codec)
-    .format(format)
-    .on('error', (e) => console.error(e));
+  const f = ffmpeg().addInput(s).inputFormat(inf).addOptions(options).complexFilter(`asetrate=${rate}*2^(1.063/12),atempo=(1/2^(1.015/12))`);
+  f.on('error', (e) => console.error(e));
   return f.pipe();
 }
 

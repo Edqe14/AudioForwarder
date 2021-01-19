@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Agent } from 'https';
 
-const format = 'mp3';
-const w = require('fs').createWriteStream('out.' + format);
+const format = 'ogg';
+const w = require('fs').createWriteStream('out/out.' + format);
 
 axios({
   method: 'get',
