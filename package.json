@@ -1,6 +1,6 @@
 {
   "name": "audioforwarder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Forward user voice from Discord to be accessible on web",
   "main": "src/Index.ts",
   "dependencies": {
