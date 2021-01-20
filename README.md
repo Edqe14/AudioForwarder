@@ -20,10 +20,10 @@ Please read `notes/README.txt`
 
  1. Capture whitelisted users or entire voice channel (anyone) voice
  2. Realtime Audio Processing using FFMPEG
- 3. Raw/Processed audio stream exposed on endpoints
- 4. HTTP, HTTPS server using Express
- 5. WebSocket using Socket.IO
- 6. WebRTC transmission
+ 3. Supports various audio formats *`(aac, mp3, webm, wav, ogg)`*
+ 4. Raw/Processed audio stream exposed on endpoints
+ 5. HTTP, HTTPS server using Express
+ 6. WebSocket using Socket.IO
 
 ## Tests 🔧
 
@@ -60,7 +60,7 @@ Found at `src/test`
 
 | Client Count | Memory Used (MB) |
 |--|--|
-| 0 *`(START)`* | 50 |
+| 0 *`(START)`* | 60 |
 | 500 | 100 |
 | 1000 | 165 |
 | 1500 | 200 |

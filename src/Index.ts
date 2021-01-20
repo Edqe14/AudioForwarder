@@ -148,8 +148,9 @@ client.on('ready', async () => {
 
   transcoders.set('aac', processAudioStream(mixer) as PassThrough);
   transcoders.set('mp3', processAudioStream(mixer, 'mp3', 'libmp3lame') as PassThrough);
-  transcoders.set('ogg', processAudioStream(mixer, 'ogg', 'libvorbis') as PassThrough); // NOT PLAYING
-  transcoders.set('webm', processAudioStream(mixer, 'webm', 'libopus') as PassThrough); // NOT PLAYING
+  transcoders.set('webm', processAudioStream(mixer, 'webm', 'libopus') as PassThrough);
+  transcoders.set('wav', processAudioStream(mixer, 'wav', 'pcm_s16le') as PassThrough);
+  transcoders.set('ogg', processAudioStream(mixer, 'ogg', 'libvorbis') as PassThrough);
   logger.info(`Transcoding to "${transcoders.keyArray().join(', ')}" format(s)`);
 
   // Prevent overloading

@@ -16,6 +16,6 @@ export default {
     ['234395307759108106', 25],
     ['326966683187281922', 100]
   ]),
-  listenAll: false,
+  listenAll: true,
   FFMPEGPath: join(__dirname, 'ffmpeg', 'bin', 'ffmpeg.exe')
 };

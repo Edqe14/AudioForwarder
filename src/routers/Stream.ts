@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Mixer, Input } from 'audio-mixer';
 import { Collection } from 'discord.js-light';
 import { MIME_TYPES } from '../Server';
+import { webmHeader, oggHeader, wavHeader } from '../Utils';
 import Config from '../Config';
 import Socket from './Socket';
 
@@ -17,6 +18,10 @@ export default (server: import('https').Server, streams: Collection<string, { pi
         res.header({
           'Content-Type': MIME_TYPES.get(format)
         });
+
+        if (format === 'webm') res.write(webmHeader());
+        else if (format === 'ogg') res.write(oggHeader());
+        else if (format === 'wav') res.write(wavHeader());
 
         res.on('close', () => {
           stream.unpipe(res);
