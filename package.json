@@ -16,6 +16,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "helmet": "^4.2.0",
     "morgan": "^1.10.0",
+    "pcm-silence": "^1.1.0",
     "socket.io": "^3.0.4",
     "socket.io-client": "^3.0.4",
     "socket.io-stream": "^0.9.1",

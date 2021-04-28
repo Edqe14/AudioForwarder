@@ -15,7 +15,8 @@ export const MIME_TYPES = new Collection([
   ['mp3', 'audio/mp3'],
   ['wav', 'audio/wav'],
   ['webm', 'audio/webm; codecs="opus"'],
-  ['ogg', 'audio/ogg']
+  ['ogg', 'audio/ogg'],
+  ['m4a', 'audio/mp4']
 ]);
 
 import Stream from './routers/Stream';

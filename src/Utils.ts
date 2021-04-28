@@ -35,10 +35,17 @@ export const processAudioStream = (s: PassThrough | Readable, format = 'adts', c
     `-c:a ${codec}`,
     `-f ${format}`,
     `-ar ${rate}`,
+    '-ac 2'
   ];
   if (format === 'webm') options.splice(1, 0, '-dash 1');
 
-  const f = ffmpeg().addInput(s).inputFormat(inf).addOptions(options).complexFilter(`asetrate=${rate}*2^(1.063/12),atempo=(1/2^(1.014/12))`);
+  const f = ffmpeg()
+    .addInput(s)
+    .inputFormat(inf)
+    .addInput('anullsrc=channel_layout=stereo:sample_rate=44100')
+    .inputFormat('lavfi')
+    .addOptions(options)
+    .complexFilter(`asetrate=${rate}*2^(1.063/12),atempo=(1/2^(1.014/12)),amerge=inputs=2`);
   f.on('error', (e) => console.error(e));
   return f.pipe();
 }

@@ -17,7 +17,6 @@ import {
   processAudioStream,
   Dumper,
   highWaterMark,
-  copyStream
 } from './Utils';
 
 export const client = new Client({
