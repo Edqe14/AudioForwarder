@@ -98,7 +98,7 @@ module.exports = {
 
     'prettier/prettier': [
       'error',
-      { singleQuote: true },
+      { singleQuote: true, jsxSingleQuote: true },
       {
         usePrettierrc: false,
       },
