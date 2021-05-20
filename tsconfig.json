@@ -18,5 +18,9 @@
     "noImplicitAny": true,
     "sourceMap": false,
     "skipDefaultLibCheck": true,
+    "baseUrl": "./src/",
+    "paths": {
+      "@utils/*": ["utils/*"]
+    }
   }
 }

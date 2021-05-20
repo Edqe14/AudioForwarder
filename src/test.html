@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test HLS Client</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <audio id="player" controls autoplay></audio>
+
+  <script>
+    function isAudioLocked() {
+      try {
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        return context.state === 'suspended';
+      } catch (e) {
+        const audio = new Audio();
+
+        try {
+          audio.play();
+          return false;
+        } catch {
+          return true;
+        }
+      }
+    }
+
+    const timer = setInterval(() => {
+      if (!isAudioLocked()) {
+        clearInterval(timer);
+        main();
+      }
+    }, 100);
+
+    function main() {
+      const id = location.pathname.replace(/\//gi, '');
+      const player = document.getElementById('player');
+      const src = `${location.protocol}//${location.host}/streams/${id}/index.m3u8`;
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(player);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        player.src = src;
+      }
+    }
+  </script>
+</body>
+</html>
