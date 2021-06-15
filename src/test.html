@@ -41,9 +41,20 @@
       const src = `${location.protocol}//${location.host}/streams/${id}/index.m3u8`;
 
       if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+          maxMaxBufferLength: 1,
+          liveSyncDuration: 0.5,
+          liveMaxLatencyDuration: 1,
+          liveBackBufferLength: 0,
+          nudgeMaxRetry: 10
+        });
         hls.loadSource(src);
         hls.attachMedia(player);
+
+        player.onplay = () => {
+          player.currentTime = hls.liveSyncPosition;
+          player.onplay = null;
+        }
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         player.src = src;
       }
