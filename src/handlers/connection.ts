@@ -1,19 +1,20 @@
-import { VoiceConnection } from 'discord.js';
+import { createVoiceReceiver, VoiceConnection } from '@discordjs/voice';
 import { Logger } from 'winston';
 import { Mixer } from 'audio-mixer';
 import fs from 'fs';
 import path from 'path';
 import Config from '../config';
+import Index from '../';
 
 import HealSelf from '@utils/healSelf';
-import Silence from '@utils/silence';
 import GenerateID from '@utils/generateID';
 
 import ffmpegPath from 'ffmpeg-static';
 import ffmpeg, { FfmpegCommand } from 'fluent-ffmpeg';
+import { GuildMember } from 'discord.js';
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-export default async (
+export default async function ConnectionHandler(
   channels: Map<string, string>,
   mixers: Map<
     string,
@@ -21,15 +22,15 @@ export default async (
   >,
   logger: Logger,
   connection: VoiceConnection,
+  member: GuildMember,
   overrideID?: string
-): Promise<string> => {
+): Promise<string> {
   // Unmute/Undeafen self
-  if (connection.voice.mute || connection.voice.deaf)
-    await HealSelf(connection);
+  if (member.voice.mute || member.voice.deaf) await HealSelf(member);
 
   // Generate unique id
   const id = Config.allowCustomIDs ? overrideID ?? GenerateID() : GenerateID();
-  channels.set(connection.voice.channelID, id);
+  channels.set(member.voice.channelId, id);
 
   // Set HLS path for use
   const m3u8Path = path.join(Config.hlsPath, id);
@@ -56,9 +57,10 @@ export default async (
   logger.info(`Created mixer for ID ${id}`);
 
   // Play silent packets to ensure data stream
-  connection.play(new Silence(), { type: 'opus' });
+  connection.subscribe(Index.silencePlayer);
   logger.info(`Playing silence to ID ${id}`);
 
+  const receiver = createVoiceReceiver(connection);
   connection.on('speaking', (user) => {
     if (
       Array.isArray(Config.whitelist.voice) &&
@@ -66,10 +68,7 @@ export default async (
     )
       return;
     // Create receiver
-    const r = connection.receiver.createStream(user, {
-      mode: 'pcm',
-      end: 'silence',
-    });
+    const r = receiver.subscribe(user.id);
 
     // Create a mixer input
     const input = mixer.input({
@@ -86,7 +85,15 @@ export default async (
     });
   });
 
-  connection.once('closing', () => connection.removeAllListeners());
+  connection.once('stateChange', (oldState, newState) => {
+    if (
+      oldState.status === 'disconnected' &&
+      newState.status !== 'disconnected'
+    )
+      return;
+
+    connection.removeAllListeners();
+  });
 
   return id;
-};
+}

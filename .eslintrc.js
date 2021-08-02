@@ -12,6 +12,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'eslint-plugin', 'prettier'],
   rules: {
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+
     'object-curly-newline': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

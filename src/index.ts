@@ -9,14 +9,28 @@ import Config from './config';
 import Server from './server';
 import Logger from './utils/logger';
 import { Mixer } from 'audio-mixer';
-import { VoiceConnection } from 'discord.js';
+import {
+  createAudioPlayer,
+  createAudioResource,
+  StreamType,
+  VoiceConnection,
+} from '@discordjs/voice';
 import { FfmpegCommand } from 'fluent-ffmpeg';
 
+import InteractionHandler from './handlers/interaction';
 import MessageHandler from './handlers/message';
-import VoiceStateUpdateHandler from './handlers/voiceStateUpdate';
+import Silence from '@utils/silence';
+// import VoiceStateUpdateHandler from './handlers/voiceStateUpdate.ts.a';
 
 const bot = Bot(Logger);
 if (Config.useServer) Server(Logger);
+
+const silencePlayer = createAudioPlayer();
+silencePlayer.play(
+  createAudioResource(new Silence(), {
+    inputType: StreamType.Opus,
+  })
+);
 
 const channels: Map<string, string> = new Map();
 // eslint-disable-next-line prettier/prettier
@@ -25,13 +39,19 @@ const mixers: Map<
   { mixer: Mixer; connection: VoiceConnection; transcoder: FfmpegCommand }
 > = new Map();
 
-bot.on('message', MessageHandler.bind(this, channels, mixers, Logger));
-bot.on(
-  'voiceStateUpdate',
-  VoiceStateUpdateHandler.bind(this, channels, mixers, Logger)
-);
+bot
+  .on(
+    'interactionCreate',
+    InteractionHandler.bind(this, channels, mixers, Logger)
+  )
+  .on('messageCreate', MessageHandler);
+// bot.on(
+//   'voiceStateUpdate',
+//   VoiceStateUpdateHandler.bind(this, channels, mixers, Logger)
+// );
 
 export default {
   channels,
   mixers,
+  silencePlayer,
 };

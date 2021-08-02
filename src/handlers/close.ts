@@ -1,17 +1,18 @@
 import { Mixer } from 'audio-mixer';
-import { VoiceConnection } from 'discord.js';
+import { VoiceConnection } from '@discordjs/voice';
 import { FfmpegCommand } from 'fluent-ffmpeg';
+import { VoiceChannel } from 'discord.js';
 
 export default (
   id: string,
-  connection: VoiceConnection,
+  channel: VoiceChannel,
   channels: Map<string, string>,
   mixers: Map<
     string,
     { mixer: Mixer; connection: VoiceConnection; transcoder?: FfmpegCommand }
   >
 ): void => {
-  if (!id) id = channels.get(connection.channel.id) ?? id;
+  if (!id) id = channels.get(channel.id) ?? id;
   if (!mixers.has(id)) throw new Error('Unknown ID');
 
   const { mixer, connection: conn, transcoder } = mixers.get(id);
@@ -19,7 +20,7 @@ export default (
   conn.removeAllListeners();
   mixer.destroy();
 
-  channels.delete(conn.channel.id);
+  channels.delete(channel.id);
   mixers.delete(id);
-  conn.channel.leave();
+  conn.disconnect();
 };

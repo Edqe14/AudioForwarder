@@ -1,6 +1,41 @@
+import { ApplicationCommandData } from 'discord.js';
 import path from 'path';
 
-export default {
+interface FFMPEGConfig {
+  format: string;
+  args: string[];
+  speedFilter: string;
+}
+
+interface MixerConfig {
+  channels: number;
+  bitDepth: number;
+  sampleRate: number;
+}
+
+interface WhitelistConfig {
+  command: string[] | null;
+  voice: string[] | null;
+  guild: string[] | null;
+}
+
+interface BotConfig {
+  slashCommands: ApplicationCommandData[];
+}
+
+interface IConfig {
+  prefix: string;
+  hlsPath: string;
+  allowCustomIDs: boolean;
+  useServer: boolean;
+  hlsFileName: string;
+  ffmpeg: FFMPEGConfig;
+  mixer: MixerConfig;
+  whitelist: WhitelistConfig;
+  bot: BotConfig;
+}
+
+const Config: IConfig = {
   prefix: 'a!',
   hlsPath: path.join(__dirname, 'streams'),
   allowCustomIDs: true,
@@ -29,9 +64,43 @@ export default {
     sampleRate: 48000,
   },
   whitelist: {
-    // Whitelist users that could run all the commands (null to disable)
+    // Whitelist user IDs that could run all the commands (null to disable)
     command: ['326966683187281922'],
-    // Whitelist to get voice data (null to disable)
+    // Whitelist user IDs to listen to (null to disable)
     voice: null,
+    // Whitelist guild ID (null to disable)
+    guild: null,
+  },
+  bot: {
+    slashCommands: [
+      {
+        name: 'join',
+        description: 'Join a voice channel and start forwarding',
+        options: [
+          {
+            name: 'id',
+            type: 'STRING',
+            description: 'Stream ID',
+            required: false,
+          },
+          {
+            name: 'channel',
+            type: 'CHANNEL',
+            description: 'Voice channel to join',
+            required: false,
+          },
+        ],
+      },
+      {
+        name: 'leave',
+        description: 'Leave from the voice chanel and stop forwarding',
+      },
+      {
+        name: 'info',
+        description: 'Get back-end statistics',
+      },
+    ],
   },
 };
+
+export default Config;
