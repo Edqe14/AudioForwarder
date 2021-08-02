@@ -4,8 +4,6 @@
 
   <a href="https://github.com/Edqe14/AudioForwarder/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Edqe14/AudioForwarder?style=for-the-badge" alt="License"></img></a>
   <a href="https://david-dm.org/edqe14/AudioForwarder"><img src="https://img.shields.io/david/Edqe14/AudioForwarder?style=for-the-badge" alt="Dependencies"></img></a>
-  <br>
-  <a href="https://github.com/standard/semistandard"><img src="https://raw.githubusercontent.com/standard/semistandard/master/badge.svg" alt="Semi-standard"></img></a>
 </div>
 
 ## Features 📜
