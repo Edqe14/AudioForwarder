@@ -6,7 +6,7 @@ import Config from '../config';
 import ErrorEmbed from '@utils/errorEmbed';
 
 import ConnectionHandler from './connection';
-// import CloseHandler from './close';
+import CloseHandler from './close';
 
 import { Mixer } from 'audio-mixer';
 import SuccessEmbed from '@utils/successEmbed';
@@ -92,7 +92,7 @@ export default async function InteractionHandler(
           ],
         });
 
-      const permission = voice.permissionsFor(member);
+      const permission = voice.permissionsFor(member.client.user.id);
       if (!permission.has(['CONNECT']))
         return interaction.reply({
           embeds: [
@@ -113,6 +113,7 @@ export default async function InteractionHandler(
 
       try {
         const connection = await connectToChannel(voice as VoiceChannel);
+        console.log('a');
 
         const id = await ConnectionHandler(
           channels,
@@ -143,119 +144,66 @@ export default async function InteractionHandler(
       return;
     }
 
+    case 'leave': {
+      const guild = interaction.guild;
+      // eslint-disable-next-line prettier/prettier
+      const voice = (await guild.members.fetch(interaction.client.user.id)).voice;
+      if (!voice)
+        return interaction.reply({
+          embeds: [
+            new ErrorEmbed({
+              description: "I'm not in a voice channel",
+            }),
+          ],
+        });
+
+      if (
+        voice?.channelId !==
+        (await guild.members.fetch(interaction.member.user.id))?.voice
+          ?.channelId
+      )
+        return interaction.reply({
+          embeds: [
+            new ErrorEmbed({
+              description: "I'm not in the voice channel you're in",
+            }),
+          ],
+        });
+
+      const id = channels.get(voice?.channelId);
+      if (!id)
+        return interaction.reply({
+          embeds: [
+            new ErrorEmbed({
+              description:
+                "I didn't find a record related to this voice channel",
+            }),
+          ],
+        });
+
+      try {
+        CloseHandler(id, voice.channel as VoiceChannel, channels, mixers);
+        return interaction.reply({
+          embeds: [
+            new SuccessEmbed({
+              description: 'Left the channel',
+            }),
+          ],
+        });
+      } catch (e) {
+        interaction.reply({
+          embeds: [
+            new ErrorEmbed({
+              description: `Error has occured while trying to leave the channel\n\n\`\`\`${e?.message}\`\`\``,
+            }),
+          ],
+        });
+
+        return logger.error(`${e.message}\n\n${e.stack}`);
+      }
+    }
+
     default:
       return;
   }
-
-  // // Prefix check
-  // if (!message.content.startsWith(Config.prefix)) return;
-
-  // const args = message.content.split(' ');
-  // const command = args
-  //   .shift()
-  //   .replace(new RegExp(Config.prefix, 'gi'), '')
-  //   .toLowerCase();
-
-  // // Commands
-  // switch (command) {
-  //   case 'join': {
-  //     // Permission check
-  //     const member = message.member;
-  //     const voice = member?.voice?.channel;
-  //     if (!voice)
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "You're not in a voice channel",
-  //         })
-  //       );
-
-  //     const permission = voice.permissionsFor(message.client.user);
-  //     if (!permission.has(['CONNECT']))
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "I don't have permission to connect",
-  //         })
-  //       );
-
-  //     if (!permission.has(['SPEAK']))
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "I don't have permission to speak",
-  //         })
-  //       );
-
-  //     try {
-  //       const connection = await voice.join();
-  //       const id = await ConnectionHandler(
-  //         channels,
-  //         mixers,
-  //         logger,
-  //         connection,
-  //         args[0]
-  //       );
-
-  //       return message.channel.send(
-  //         new SuccessEmbed({
-  //           description: `Successfuly created a listener with ID **${id}**`,
-  //         })
-  //       );
-  //     } catch (e) {
-  //       message.channel.send(
-  //         new ErrorEmbed({
-  //           description: `Error has occured while trying to join the channel\n\n\`\`\`${e?.message}\`\`\``,
-  //         })
-  //       );
-  //       logger.error(`${e.message}\n\n${e.stack}`);
-  //     }
-  //     return;
-  //   }
-
-  //   case 'leave': {
-  //     const guild = message.guild;
-  //     const voice = guild.voice;
-  //     if (!voice)
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "I'm not in a voice channel",
-  //         })
-  //       );
-
-  //     if (voice?.channelID !== message.member?.voice?.channelID)
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "I'm not in the voice channel you're in",
-  //         })
-  //       );
-
-  //     const id = channels.get(voice?.channelID);
-  //     if (!id)
-  //       return message.channel.send(
-  //         new ErrorEmbed({
-  //           description: "I didn't find a record related to this voice channel",
-  //         })
-  //       );
-
-  //     try {
-  //       CloseHandler(id, voice.connection, channels, mixers);
-  //       return message.channel.send(
-  //         new SuccessEmbed({
-  //           description: 'Left the channel',
-  //         })
-  //       );
-  //     } catch (e) {
-  //       message.channel.send(
-  //         new ErrorEmbed({
-  //           description: `Error has occured while trying to leave the channel\n\n\`\`\`${e?.message}\`\`\``,
-  //         })
-  //       );
-
-  //       return logger.error(`${e.message}\n\n${e.stack}`);
-  //     }
-  //   }
-
-  //
-
-  //   default:
-  //     return;
-  // }
 }

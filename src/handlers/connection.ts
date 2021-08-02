@@ -61,29 +61,28 @@ export default async function ConnectionHandler(
   logger.info(`Playing silence to ID ${id}`);
 
   const receiver = createVoiceReceiver(connection);
-  connection.on('speaking', (user) => {
-    if (
-      Array.isArray(Config.whitelist.voice) &&
-      !Config.whitelist.voice.includes(user.id)
-    )
-      return;
-    // Create receiver
-    const r = receiver.subscribe(user.id);
+  Config.whitelist.voice
+    .filter((id) => member.voice.channel.members.has(id))
+    .forEach((id) => {
+      // Create receiver
+      const r = receiver.subscribe(id);
 
-    // Create a mixer input
-    const input = mixer.input({
-      highWaterMark: 1 << 20,
-      clearInterval: 250,
-      volume: 100,
-    });
+      // Create a mixer input
+      const input = mixer.input(
+        {
+          highWaterMark: 1 << 20,
+          clearInterval: 250,
+          volume: 100,
+        },
+        2
+      );
 
-    // Pipe voice receiver and pipe to mixer
-    r.pipe(input);
-    r.on('end', () => {
-      mixer.removeInput(input);
-      r.removeAllListeners();
+      r.pipe(input);
+      r.on('end', () => {
+        mixer.removeInput(input);
+        r.removeAllListeners();
+      });
     });
-  });
 
   connection.once('stateChange', (oldState, newState) => {
     if (

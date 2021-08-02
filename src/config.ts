@@ -66,8 +66,8 @@ const Config: IConfig = {
   whitelist: {
     // Whitelist user IDs that could run all the commands (null to disable)
     command: ['326966683187281922'],
-    // Whitelist user IDs to listen to (null to disable)
-    voice: null,
+    // User IDs to listen to
+    voice: ['326966683187281922'],
     // Whitelist guild ID (null to disable)
     guild: null,
   },
