@@ -25,6 +25,12 @@ export default async (
   message: Message
 ): Promise<unknown> => {
   if (message.author.bot) return;
+  if (
+    Array.isArray(Config.whitelist.command) &&
+    !Config.whitelist.command.includes(message.author.id)
+  )
+    return;
+
   // Prefix check
   if (!message.content.startsWith(Config.prefix)) return;
 

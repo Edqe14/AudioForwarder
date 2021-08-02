@@ -60,6 +60,11 @@ export default async (
   logger.info(`Playing silence to ID ${id}`);
 
   connection.on('speaking', (user) => {
+    if (
+      Array.isArray(Config.whitelist.voice) &&
+      !Config.whitelist.voice.includes(user.id)
+    )
+      return;
     // Create receiver
     const r = connection.receiver.createStream(user, {
       mode: 'pcm',

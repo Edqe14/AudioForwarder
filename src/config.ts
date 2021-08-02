@@ -28,4 +28,10 @@ export default {
     bitDepth: 32,
     sampleRate: 48000,
   },
+  whitelist: {
+    // Whitelist users that could run all the commands (null to disable)
+    command: ['326966683187281922'],
+    // Whitelist to get voice data (null to disable)
+    voice: null,
+  },
 };
