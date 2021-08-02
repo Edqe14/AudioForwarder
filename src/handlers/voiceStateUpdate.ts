@@ -2,10 +2,11 @@ import { Mixer } from 'audio-mixer';
 import { VoiceConnection, VoiceState } from 'discord.js';
 import { FfmpegCommand } from 'fluent-ffmpeg';
 import { Logger } from 'winston';
+import HealSelf from '@utils/healSelf';
 
 import CloseHandler from './close';
 
-export default (
+export default async (
   channels: Map<string, string>,
   mixers: Map<
     string,
@@ -14,8 +15,20 @@ export default (
   logger: Logger,
   oldState: VoiceState,
   newState: VoiceState
-): void => {
+): Promise<unknown> => {
+  // If not bot
   if (newState.member.id !== newState.client.user.id) return;
+
+  // If bot is deafened/muted
+  if (
+    newState.selfDeaf ||
+    newState.selfMute ||
+    newState.deaf ||
+    newState.mute
+  ) {
+    await HealSelf(newState.connection);
+  }
+
   // Bot Leave
   if (!!oldState?.channel && !newState?.channel) {
     const connection = oldState.connection;
@@ -24,7 +37,7 @@ export default (
       try {
         return CloseHandler(id, connection, channels, mixers);
       } catch (e) {
-        logger.error(`${e.message}\n\n${e.stack}`);
+        return logger.error(`${e.message}\n\n${e.stack}`);
       }
     }
   }

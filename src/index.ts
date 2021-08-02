@@ -5,6 +5,7 @@ dotenv.config({
 });
 
 import Bot from './bot';
+import Config from './config';
 import Server from './server';
 import Logger from './utils/logger';
 import { Mixer } from 'audio-mixer';
@@ -15,7 +16,7 @@ import MessageHandler from './handlers/message';
 import VoiceStateUpdateHandler from './handlers/voiceStateUpdate';
 
 const bot = Bot(Logger);
-Server(Logger);
+if (Config.useServer) Server(Logger);
 
 const channels: Map<string, string> = new Map();
 // eslint-disable-next-line prettier/prettier

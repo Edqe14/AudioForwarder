@@ -5,7 +5,13 @@ import Config from './config';
 import path from 'path';
 import { Logger } from 'winston';
 
-export default (logger: Logger): Express => {
+interface IServer {
+  app: Express;
+  server: import('http').Server;
+  PORT: number;
+}
+
+export default (logger: Logger): IServer => {
   const app = express();
   app.use(cors());
   app.use(
@@ -20,8 +26,10 @@ export default (logger: Logger): Express => {
     res.sendFile(path.join(__dirname, 'test.html'))
   );
 
-  const PORT = 3000;
-  app.listen(PORT, () => logger.info(`Listening to port ${PORT}`));
+  const PORT = parseInt(process.env.PORT, 10) || 3000;
+  const server = app.listen(PORT, () =>
+    logger.info(`Listening to port ${PORT}`)
+  );
 
-  return app;
+  return { app, server, PORT };
 };

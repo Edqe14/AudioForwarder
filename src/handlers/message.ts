@@ -9,7 +9,11 @@ import CloseHandler from './close';
 
 import { Mixer } from 'audio-mixer';
 import SuccessEmbed from '@utils/successEmbed';
+import secNSec2ms from '@utils/secNSec2ms';
 import { FfmpegCommand } from 'fluent-ffmpeg';
+
+const startTime = process.hrtime();
+const startUsage = process.cpuUsage();
 
 export default async (
   channels: Map<string, string>,
@@ -30,6 +34,7 @@ export default async (
     .replace(new RegExp(Config.prefix, 'gi'), '')
     .toLowerCase();
 
+  // Commands
   switch (command) {
     case 'join': {
       // Permission check
@@ -63,7 +68,8 @@ export default async (
           channels,
           mixers,
           logger,
-          connection
+          connection,
+          args[0]
         );
 
         return message.channel.send(
@@ -123,6 +129,33 @@ export default async (
 
         return logger.error(`${e.message}\n\n${e.stack}`);
       }
+    }
+
+    case 'info': {
+      const mem = process.memoryUsage().heapUsed;
+
+      const elapTime = process.hrtime(startTime);
+      const elapUsage = process.cpuUsage(startUsage);
+
+      const elapTimeMS = secNSec2ms(elapTime);
+      const elapUserMS = secNSec2ms(elapUsage.user);
+      const elapSystMS = secNSec2ms(elapUsage.system);
+
+      return message.channel.send(
+        new SuccessEmbed({
+          description: `**CPU** \`${(
+            (100 * (elapUserMS + elapSystMS)) /
+            elapTimeMS
+          ).toFixed(2)}%\`\n**Memory** \`${(mem / 1024 / 1024).toFixed(
+            2
+          )} MB\`\n\n**Rooms** (${mixers.size})\n\`\`\`${
+            [...mixers.keys()].join(', ') || 'Empty...'
+          }\`\`\``,
+        })
+          .setTitle('Process Info')
+          .setColor('#fefefe')
+          .setTimestamp()
+      );
     }
 
     default:

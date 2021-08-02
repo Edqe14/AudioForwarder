@@ -16,12 +16,12 @@
       "esnext.symbol"
     ],
     "noImplicitAny": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "skipDefaultLibCheck": true,
     "baseUrl": "./src/",
     "paths": {
       "@utils/*": ["utils/*"]
     }
   },
-  "exclude": ["./src/streams/*/*"]
+  "exclude": ["./src/streams/*/*", "node_modules"]
 }
